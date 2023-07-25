@@ -1,6 +1,6 @@
 "use client";
 import { DetailedHTMLProps, InputHTMLAttributes } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, Control, Path } from "react-hook-form";
 
 const Page = () => {
   return (
@@ -23,10 +23,70 @@ const StyledInput = (
   return (
     <input
       {...props}
-      className="border border-gray-300 text-black rounded-md px-4 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+      className="border border-gray-300 text-slate-800 rounded-md px-4 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
     />
   );
 };
+
+const FirstNameInput = <T extends { firstName: string }>({
+  control,
+}: {
+  control: Control<T>;
+}) => (
+  <Controller
+    name={"firstName" as Path<T>}
+    control={control}
+    render={({ field: { ref, ...field } }) => (
+      <StyledInput
+        {...field}
+        onChange={(e) => {
+          field.onChange(e);
+        }}
+      />
+    )}
+  />
+);
+
+const LastNameInput = <T extends { firstName: string }>({
+  control,
+}: {
+  control: Control<T>;
+}) => (
+  <Controller
+    name={"firstName" as Path<T>}
+    control={control}
+    render={({ field: { ref, ...field } }) => (
+      <StyledInput
+        {...field}
+        onChange={(e) => {
+          field.onChange(e);
+        }}
+      />
+    )}
+  />
+);
+
+const buildUnNestedStringInput =
+  <K extends string>(fieldName: K) =>
+  // eslint-disable-next-line react/display-name
+  <T extends { [S in K]: string }>({ control }: { control: Control<T> }) =>
+    (
+      <Controller
+        name={fieldName as unknown as Path<T>}
+        control={control}
+        render={({ field: { ref, ...field } }) => (
+          <StyledInput
+            {...field}
+            onChange={(e) => {
+              field.onChange(e);
+            }}
+          />
+        )}
+      />
+    );
+
+const FirstName = buildUnNestedStringInput("firstName");
+const SecondName = buildUnNestedStringInput("secondName");
 
 type DefaultValues = {
   firstName: string;
@@ -47,7 +107,6 @@ function FieldArray() {
       anotherVal: "someVal",
     },
     resolver: (values) => {
-      values.customObject.key3;
       return {
         values: {
           ...values,
@@ -60,23 +119,13 @@ function FieldArray() {
   return (
     <form
       onSubmit={handleSubmit((data) => {
-        data.customObject.key3;
         console.log(data);
       })}
     >
       <h1>Field Array </h1>
-      <Controller
-        name="firstName"
-        control={control}
-        render={({ field: { ref, ...field } }) => (
-          <StyledInput
-            {...field}
-            onChange={(e) => {
-              field.onChange(e);
-            }}
-          />
-        )}
-      />
+      <FirstNameInput control={control} />
+      <FirstName control={control} />
+      <SecondName control={control} />
       <input type="submit" />
     </form>
   );
